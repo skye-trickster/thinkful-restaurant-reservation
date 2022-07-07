@@ -88,6 +88,9 @@ function checkValidTime(request, response, next) {
 	});
 }
 
+/**
+ * Validate all parameters for creation
+ */
 const checkParameters = [
 	parameterExists("first_name"),
 	isEmptyString("first_name"),
@@ -103,6 +106,26 @@ const checkParameters = [
 	checkPersonMinimum,
 ];
 
+async function create(request, response) {
+	const reservation = await service.create(response.locals.reservation);
+	response.status(201).json({ data: reservation });
+}
+
+/**
+ * List handler for reservation resources
+ */
+async function list(req, res) {
+	let { date } = req.query;
+
+	if (date) {
+		return res.json({ data: await service.listByDate(date) });
+	}
+
+	res.json({
+		data: await service.list(),
+	});
+}
+
 async function reservationExists(request, response, next) {
 	const reservation = await service.find(request.params.reservationId);
 
@@ -115,20 +138,6 @@ async function reservationExists(request, response, next) {
 		status: 404,
 		message: `Reservation ID ${request.params.reservationId} cannot be found.`,
 	});
-}
-
-/**
- * List handler for reservation resources
- */
-async function list(req, res) {
-	res.json({
-		data: await service.list(),
-	});
-}
-
-async function create(request, response) {
-	const reservation = await service.create(response.locals.reservation);
-	response.status(201).json({ data: reservation });
 }
 
 function read(request, response) {
