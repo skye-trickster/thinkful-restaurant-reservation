@@ -43,7 +43,8 @@
     "test:8:frontend": "npm run test:8 --prefix ./front-end",
     "test:8:backend": "npm run test:8 --prefix ./back-end",
     "test:e2e": "npm run test:e2e --prefix ./front-end",
-    "test:frontend:watch": "npm test --prefix ./front-end"
+    "test:frontend:watch": "npm test --prefix ./front-end",
+    "push:backend": "git subtree push --prefix back-end back-end main"
   },
   "keywords": [],
   "author": "Thinkful, Inc.",
