@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import useQuery from "../utils/useQuery";
-import { next } from "../utils/date-time";
+import { previous, next } from "../utils/date-time";
 import formatReservationTime from "../utils/format-reservation-time";
 import formatReservationDate from "../utils/format-reservation-date";
 import { listReservations } from "../utils/api";
@@ -15,36 +15,48 @@ import ErrorAlert from "../layout/ErrorAlert";
 function Dashboard({ date }) {
 	const [reservations, setReservations] = useState([]);
 	const [reservationsError, setReservationsError] = useState(null);
-	const query = useQuery();
-	const dateSearch = query.get("date");
 
-	if (dateSearch && dateSearch !== date) {
-		date = dateSearch;
-	}
+	// state variable to change the date dynamically instead of constantly loading the date
+	const [currentDate, setDate] = useState(date);
 
-	useEffect(loadDashboard, [date]);
+	// query in case passed through a query
+	const queryDate = useQuery().get("date");
+
+	useEffect(
+		function () {
+			if (queryDate && currentDate !== queryDate) setDate(queryDate);
+			else if (!queryDate) setDate(date);
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[queryDate]
+	);
+	useEffect(loadDashboard, [currentDate]);
 
 	function loadDashboard() {
 		const abortController = new AbortController();
 		setReservationsError(null);
-		listReservations({ date }, abortController.signal)
+		listReservations({ date: currentDate }, abortController.signal)
 			.then(setReservations)
 			.catch(setReservationsError);
 		return () => abortController.abort();
 	}
 
 	function nextDate() {
-		console.log("hello?");
-		console.log(next(date));
-		query.set("date", next(date));
+		setDate(next(currentDate));
 	}
+
+	function previousDate() {
+		setDate(previous(currentDate));
+	}
+
 	return (
 		<main>
 			<h1 className="text-center">Dashboard</h1>
 			<div className="d-md-flex mb-3 justify-content-around">
-				<button>Previous</button>
-				<h4 className="mb-0 text-center">Reservations for {date}</h4>
-				<a onClick={nextDate}>Next</a>
+				<button onClick={previousDate}>Previous</button>
+				<h4 className="mb-0 text-center">Reservations for {currentDate}</h4>
+
+				<button onClick={nextDate}>Next</button>
 			</div>
 			<ErrorAlert error={reservationsError} />
 			<table className="w-100">
