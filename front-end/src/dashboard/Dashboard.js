@@ -6,6 +6,8 @@ import formatReservationDate from "../utils/format-reservation-date";
 import { listReservations } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 
+import { useHistory } from "react-router-dom";
+
 /**
  * Defines the dashboard page.
  * @param date
@@ -18,6 +20,8 @@ function Dashboard({ date }) {
 
 	// state variable to change the date dynamically instead of constantly loading the date
 	const [currentDate, setDate] = useState(date);
+
+	const history = useHistory();
 
 	// query in case passed through a query
 	const queryDate = useQuery().get("date");
@@ -42,11 +46,11 @@ function Dashboard({ date }) {
 	}
 
 	function nextDate() {
-		setDate(next(currentDate));
+		history.push(`/dashboard?date=${next(currentDate)}`);
 	}
 
 	function previousDate() {
-		setDate(previous(currentDate));
+		history.push(`/dashboard?date=${previous(currentDate)}`);
 	}
 
 	return (
