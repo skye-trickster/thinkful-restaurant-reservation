@@ -16,9 +16,9 @@ function NewReservation() {
 
 	const create = (reservation) => {
 		const abortController = new AbortController();
-		setFormError(null);
+		//setFormError(null);
 		try {
-			checkValidDate(reservation);
+			//checkValidDate(reservation);
 			return createReservation(reservation, abortController.signal)
 				.then(() =>
 					history.push(`/dashboard?date=${reservation.reservation_date}`)
@@ -33,7 +33,7 @@ function NewReservation() {
 	const checkValidDate = (reservation) => {
 		setFormError(null);
 		if (new Date(reservation.reservation_date) < Date.now())
-			throw new Error("Requested Date must be set in the future.");
+			throw new Error("Requested Date must be set in the future!");
 	};
 
 	return (
