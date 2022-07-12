@@ -74,6 +74,29 @@ function checkValidDate(request, response, next) {
 	});
 }
 
+function checkOpenDay(request, response, next) {
+	const { reservation_date } = response.locals.reservation;
+	const date = new Date(reservation_date);
+
+	if (date.getUTCDay() === 2)
+		return next({
+			status: 400,
+			message: "Restaurant is closed on Tuesdays.",
+		});
+
+	next();
+}
+
+function checkFutureDay(request, response, next) {
+	const { reservation_date } = response.locals.reservation;
+	if (new Date(reservation_date) < Date.now())
+		return next({
+			status: 400,
+			message: "Requested date must be set in the future.",
+		});
+	next();
+}
+
 function checkValidTime(request, response, next) {
 	const { reservation_time, reservation_date } = response.locals.reservation;
 
@@ -100,6 +123,8 @@ const checkParameters = [
 	isEmptyString("mobile_number"),
 	parameterExists("reservation_date"),
 	checkValidDate,
+	checkOpenDay,
+	checkFutureDay,
 	parameterExists("reservation_time"),
 	checkValidTime,
 	parameterExists("people"),
