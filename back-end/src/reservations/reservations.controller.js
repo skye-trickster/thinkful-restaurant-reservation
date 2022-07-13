@@ -74,6 +74,31 @@ function checkValidDate(request, response, next) {
 	});
 }
 
+function checkOpenDay(request, response, next) {
+	const { reservation_date } = response.locals.reservation;
+	const date = new Date(reservation_date);
+
+	if (date.getUTCDay() === 2)
+		return next({
+			status: 400,
+			message: "Restaurant is closed on Tuesdays.",
+		});
+
+	next();
+}
+
+function checkFutureDay(request, response, next) {
+	const { reservation_date } = response.locals.reservation;
+
+	// comparing dates only, removing local times
+	if (new Date(reservation_date) < new Date(new Date().toLocaleDateString()))
+		return next({
+			status: 400,
+			message: "Requested date must be set in the future.",
+		});
+	next();
+}
+
 function checkValidTime(request, response, next) {
 	const { reservation_time, reservation_date } = response.locals.reservation;
 
@@ -84,8 +109,34 @@ function checkValidTime(request, response, next) {
 
 	next({
 		status: 400,
-		message: "reservation_time is not a valid time.",
+		message: "Requested Time is not a valid time.",
 	});
+}
+
+function checkOpenTime(request, response, next) {
+	const { reservation_time, reservation_date } = response.locals.reservation;
+	const requestedTime = new Date(`${reservation_date} ${reservation_time}`);
+	const firstReservation = new Date(`${reservation_date} 10:30`);
+	const lastReservation = new Date(`${reservation_date} 21:30`);
+
+	if (requestedTime > firstReservation && requestedTime < lastReservation)
+		return next();
+
+	return next({
+		status: 400,
+		message: "Restaurant is closed during requested time.",
+	});
+}
+
+function checkFutureTime(request, response, next) {
+	const { reservation_time, reservation_date } = response.locals.reservation;
+	const requestedTime = new Date(`${reservation_date} ${reservation_time}`);
+	if (requestedTime < Date.now())
+		return next({
+			status: 400,
+			message: "Requested date must be set in the future.",
+		});
+	next();
 }
 
 /**
@@ -100,8 +151,12 @@ const checkParameters = [
 	isEmptyString("mobile_number"),
 	parameterExists("reservation_date"),
 	checkValidDate,
+	checkOpenDay,
+	checkFutureDay,
 	parameterExists("reservation_time"),
 	checkValidTime,
+	checkOpenTime,
+	checkFutureTime,
 	parameterExists("people"),
 	checkPersonMinimum,
 ];
