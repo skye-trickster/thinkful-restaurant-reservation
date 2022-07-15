@@ -18,6 +18,8 @@ function Dashboard({ date }) {
 	const [reservations, setReservations] = useState([]);
 	const [reservationsError, setReservationsError] = useState(null);
 
+	const [tables, setTables] = useState([]);
+
 	// state variable to change the date dynamically instead of constantly loading the date
 	const [currentDate, setDate] = useState(date);
 
@@ -57,10 +59,14 @@ function Dashboard({ date }) {
 		<main>
 			<h1 className="text-center">Dashboard</h1>
 			<div className="d-md-flex mb-3 justify-content-around">
-				<button onClick={previousDate}>Previous</button>
+				<button className="btn btn-primary" onClick={previousDate}>
+					Previous
+				</button>
 				<h4 className="mb-0 text-center">Reservations for {currentDate}</h4>
 
-				<button onClick={nextDate}>Next</button>
+				<button className="btn btn-primary" onClick={nextDate}>
+					Next
+				</button>
 			</div>
 			<ErrorAlert error={reservationsError} />
 			<table className="w-100">
@@ -86,11 +92,22 @@ function Dashboard({ date }) {
 								<td>{reservation.reservation_date}</td>
 								<td>{reservation.reservation_time}</td>
 								<td>{reservation.people}</td>
+								<a
+									href={`/reservations/${reservation.reservation_id}/seat`}
+									className="btn btn-primary"
+									role="button"
+								>
+									Seat
+								</a>
 							</tr>
 						);
 					})}
 				</tbody>
 			</table>
+
+			<>
+				<h2>Tables</h2>
+			</>
 		</main>
 	);
 }
