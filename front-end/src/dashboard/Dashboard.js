@@ -97,13 +97,15 @@ function Dashboard({ date }) {
 								<td>{reservation.reservation_date}</td>
 								<td>{reservation.reservation_time}</td>
 								<td>{reservation.people}</td>
-								<a
-									href={`/reservations/${reservation.reservation_id}/seat`}
-									className="btn btn-primary"
-									role="button"
-								>
-									Seat
-								</a>
+								<td>
+									<a
+										href={`/reservations/${reservation.reservation_id}/seat`}
+										className="btn btn-primary"
+										role="button"
+									>
+										Seat
+									</a>
+								</td>
 							</tr>
 						);
 					})}
@@ -121,6 +123,7 @@ function Dashboard({ date }) {
 						</tr>
 					</thead>
 					<tbody>
+						<ErrorAlert error={tablesError} />
 						{tables.map((table) => {
 							return (
 								<tr key={table.table_id}>

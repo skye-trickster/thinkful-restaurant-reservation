@@ -93,6 +93,7 @@ export async function createTable(table, signal) {
 	return await fetchJson(url, options, {});
 }
 
+// TODO: Seat
 export async function listTables(signal) {
 	return [
 		{ table_id: 1, table_name: "Bar #1", capacity: 1, reservation_id: null },
@@ -100,4 +101,19 @@ export async function listTables(signal) {
 		{ table_id: 3, table_name: "#1", capacity: 6, reservation_id: null },
 		{ table_id: 4, table_name: "#2", capacity: 6, reservation_id: null },
 	];
+}
+
+export async function seatTable(reservation_id, table_id, signal) {
+	return true;
+	// TODO: ACTUALLY SEAT ITEMS
+	// eslint-disable-next-line
+	const url = new URL(`${API_BASE_URL}/tables/${table_id}/seat`);
+	const options = {
+		method: "PUT",
+		headers,
+		body: JSON.stringify({ data: { reservation_id } }),
+		signal,
+	};
+
+	return await fetchJson(url, options, {});
 }
