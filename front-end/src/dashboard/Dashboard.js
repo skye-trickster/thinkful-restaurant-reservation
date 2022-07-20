@@ -3,7 +3,7 @@ import useQuery from "../utils/useQuery";
 import { previous, next } from "../utils/date-time";
 import formatReservationTime from "../utils/format-reservation-time";
 import formatReservationDate from "../utils/format-reservation-date";
-import { listReservations } from "../utils/api";
+import { listReservations, listTables } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 
 import { useHistory } from "react-router-dom";
@@ -19,6 +19,7 @@ function Dashboard({ date }) {
 	const [reservationsError, setReservationsError] = useState(null);
 
 	const [tables, setTables] = useState([]);
+	const [tablesError, setTablesError] = useState(null);
 
 	// state variable to change the date dynamically instead of constantly loading the date
 	const [currentDate, setDate] = useState(date);
@@ -44,6 +45,10 @@ function Dashboard({ date }) {
 		listReservations({ date: currentDate }, abortController.signal)
 			.then(setReservations)
 			.catch(setReservationsError);
+
+		setTablesError(null);
+		listTables(abortController.signal).then(setTables).catch(setTablesError);
+
 		return () => abortController.abort();
 	}
 
@@ -104,10 +109,31 @@ function Dashboard({ date }) {
 					})}
 				</tbody>
 			</table>
-
-			<>
-				<h2>Tables</h2>
-			</>
+			<div className="mt-2">
+				<h2 className="text-center">Tables</h2>
+				<table className="w-100">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Name</th>
+							<th>Capacity</th>
+							<th>Reservation</th>
+						</tr>
+					</thead>
+					<tbody>
+						{tables.map((table) => {
+							return (
+								<tr key={table.table_id}>
+									<td>{table.table_id}</td>
+									<td>{table.table_name}</td>
+									<td>{table.capacity}</td>
+									<td>{table.reservation_id}</td>
+								</tr>
+							);
+						})}
+					</tbody>
+				</table>
+			</div>
 		</main>
 	);
 }
