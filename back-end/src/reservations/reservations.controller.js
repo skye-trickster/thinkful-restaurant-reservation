@@ -51,7 +51,7 @@ function isEmptyString(parameter) {
 function checkPersonMinimum(request, response, next) {
 	const { people } = response.locals.reservation;
 
-	if (typeof people !== "number" || people <= 1) {
+	if (typeof people !== "number" || people < 1) {
 		return next({
 			status: 400,
 			message: "Number of people must be at least 1.",
