@@ -130,7 +130,7 @@ function Dashboard({ date }) {
 									<td>{table.table_id}</td>
 									<td>{table.table_name}</td>
 									<td>{table.capacity}</td>
-									<td>{table.reservation_id}</td>
+									<td>{table.reservation_id === null ? "Free" : "Occupied"}</td>
 								</tr>
 							);
 						})}

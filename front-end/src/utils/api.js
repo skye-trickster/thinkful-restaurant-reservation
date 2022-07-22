@@ -57,13 +57,20 @@ async function fetchJson(url, options, onCancel) {
  * @returns {Promise<[reservation]>}
  *  a promise that resolves to a possibly empty array of reservation saved in the database.
  */
-
 export async function listReservations(params, signal) {
 	const url = new URL(`${API_BASE_URL}/reservations`);
-	console.log("URL testing: ", url);
+	//console.log("URL testing: ", url);
 	Object.entries(params).forEach(([key, value]) =>
 		url.searchParams.append(key, value.toString())
 	);
+	return await fetchJson(url, { headers, signal }, [])
+		.then(formatReservationDate)
+		.then(formatReservationTime);
+}
+
+export async function readReservation(reservation_id, signal) {
+	const url = new URL(`${API_BASE_URL}/reservations/${reservation_id}`);
+	//console.log("URL testing: ", url);
 	return await fetchJson(url, { headers, signal }, [])
 		.then(formatReservationDate)
 		.then(formatReservationTime);
@@ -81,6 +88,13 @@ export async function createReservation(reservation, signal) {
 	return await fetchJson(url, options, {});
 }
 
+export async function listTables(signal) {
+	const url = new URL(`${API_BASE_URL}/tables`);
+	//console.log("URL testing: ", url);
+
+	return await fetchJson(url, { headers, signal }, []);
+}
+
 export async function createTable(table, signal) {
 	const url = new URL(`${API_BASE_URL}/tables`);
 	const options = {
@@ -93,20 +107,7 @@ export async function createTable(table, signal) {
 	return await fetchJson(url, options, {});
 }
 
-// TODO: Seat
-export async function listTables(signal) {
-	return [
-		{ table_id: 1, table_name: "Bar #1", capacity: 1, reservation_id: null },
-		{ table_id: 2, table_name: "Bar #2", capacity: 1, reservation_id: null },
-		{ table_id: 3, table_name: "#1", capacity: 6, reservation_id: null },
-		{ table_id: 4, table_name: "#2", capacity: 6, reservation_id: null },
-	];
-}
-
 export async function seatTable(reservation_id, table_id, signal) {
-	return true;
-	// TODO: ACTUALLY SEAT ITEMS
-	// eslint-disable-next-line
 	const url = new URL(`${API_BASE_URL}/tables/${table_id}/seat`);
 	const options = {
 		method: "PUT",

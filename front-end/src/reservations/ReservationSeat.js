@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouteMatch, useHistory } from "react-router-dom";
 import ErrorAlert from "../layout/ErrorAlert";
-import { listReservations, listTables, seatTable } from "../utils/api";
+import { listTables, readReservation, seatTable } from "../utils/api";
 
 function ReservationSeat() {
 	const { reservation_id } = useRouteMatch().params;
@@ -29,12 +29,9 @@ function ReservationSeat() {
 
 	useEffect(() => {
 		const abortController = new AbortController();
-		listReservations({}, abortController.signal).then((reservations) => {
-			const res = reservations.find(
-				(_reservation) => _reservation.reservation_id === Number(reservation_id)
-			);
-			setReservation(res);
-		});
+		readReservation(Number(reservation_id), abortController.signal).then(
+			setReservation
+		);
 	}, [reservation_id]);
 
 	const cancelHandler = () => {
@@ -60,7 +57,11 @@ function ReservationSeat() {
 				reservation.reservation_id,
 				table.table_id,
 				abortController.signal
-			);
+			)
+				.then(() => {
+					history.push("/dashboard");
+				})
+				.catch(setFormError);
 			return () => abortController.abort();
 		} catch (error) {
 			setFormError(error);
@@ -76,25 +77,24 @@ function ReservationSeat() {
 			<h2>Seat Reservation for ID: {reservation_id} </h2>
 			<ErrorAlert error={formError} />
 			<form onSubmit={submitHandler}>
-				<label htmlFor="table_id">
-					<select
-						required
-						value={seat}
-						onChange={updateSeating}
-						name="table_id"
-					>
-						{tables.map((table) => {
-							return (
-								<option key={table.table_id} value={table.table_id}>
-									{table.table_name} - {table.capacity}
-								</option>
-							);
-						})}
-					</select>
-				</label>
+				<select
+					onChange={updateSeating}
+					id={"table_id"}
+					name={"table_id"}
+					aria-label={"table_id"}
+				>
+					{tables.map((table) => {
+						return (
+							<option key={table.table_id} value={table.table_name}>
+								{table.table_name} - {table.capacity}
+							</option>
+						);
+					})}
+				</select>
+
 				<div>
 					<button type="submit">Submit</button>
-					<button type="cancel" onClick={cancelHandler}>
+					<button type="button" onClick={cancelHandler}>
 						Cancel
 					</button>
 				</div>
