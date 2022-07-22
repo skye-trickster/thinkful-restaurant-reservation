@@ -66,7 +66,7 @@ function ReservationForm({
 					onChange={updateData}
 					value={reservation.mobile_number}
 					placeholder="123-456-7890"
-					pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+					pattern="([0-9]{3}-[0-9]{3}-[0-9]{4})|([0-9]{10})"
 					required
 				/>
 			</label>
