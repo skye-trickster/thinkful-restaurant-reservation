@@ -26,10 +26,18 @@ async function seat_table(table_id, reservation_id) {
 		.then((updatedTable) => updatedTable[0]);
 }
 
+async function stop_seating_table(table_id) {
+	return knex("tables")
+		.update({ reservation_id: null })
+		.where({ table_id })
+		.then((updatedTable) => updatedTable[0]);
+}
+
 module.exports = {
 	list,
 	find,
 	create,
 	find_reservation,
 	seat_table,
+	stop_seating_table,
 };

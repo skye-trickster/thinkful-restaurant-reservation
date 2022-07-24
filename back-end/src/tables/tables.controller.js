@@ -162,6 +162,26 @@ async function seatTable(request, response, next) {
 	response.json({ data: updatedTable });
 }
 
+function checkOccupied(request, response, next) {
+	const { table } = response.locals;
+
+	if (table.reservation_id === null)
+		return next({
+			status: 400,
+			message: "table is not occupied",
+		});
+
+	next();
+}
+
+async function stopSeating(request, response, next) {
+	const { table } = response.locals;
+
+	let updatedTable = await service.stop_seating_table(table.table_id);
+
+	return response.status(200).json({ data: updatedTable });
+}
+
 module.exports = {
 	list: asyncErrorBoundary(list),
 	create: [createTable, checkParameters, asyncErrorBoundary(create)],
@@ -172,5 +192,10 @@ module.exports = {
 		asyncErrorBoundary(reservationExists),
 		validSeating,
 		asyncErrorBoundary(seatTable),
+	],
+	endSeat: [
+		asyncErrorBoundary(tableExists),
+		checkOccupied,
+		asyncErrorBoundary(stopSeating),
 	],
 };
