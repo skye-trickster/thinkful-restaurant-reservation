@@ -78,6 +78,8 @@ function Dashboard({ date }) {
 		}
 	}
 
+	function finishReservation(reservation) {}
+
 	return (
 		<main>
 			<h1 className="text-center">Dashboard</h1>
@@ -101,6 +103,7 @@ function Dashboard({ date }) {
 						<th>Date</th>
 						<th>Time</th>
 						<th>People</th>
+						<th>Status</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -115,6 +118,9 @@ function Dashboard({ date }) {
 								<td>{reservation.reservation_date}</td>
 								<td>{reservation.reservation_time}</td>
 								<td>{reservation.people}</td>
+								<td data-reservation-id-status={reservation.reservation_id}>
+									undefined
+								</td>
 								<td>
 									<a
 										href={`/reservations/${reservation.reservation_id}/seat`}
@@ -122,6 +128,15 @@ function Dashboard({ date }) {
 										role="button"
 									>
 										Seat
+									</a>
+								</td>
+								<td>
+									<a
+										onClick={() => finishReservation(reservation)}
+										role="button"
+										className="btn btn-danger"
+									>
+										Finish
 									</a>
 								</td>
 							</tr>

@@ -15,6 +15,7 @@ async function listByDate(reservation_date) {
 	return knex("reservations")
 		.select("*")
 		.where({ reservation_date })
+		.andWhereNot({ status: "finished" })
 		.orderBy("reservation_time");
 }
 
@@ -35,9 +36,18 @@ async function create(reservation) {
 		.then((createdReservation) => createdReservation[0]);
 }
 
+function updateStatus(reservation_id, status) {
+	return knex("reservations")
+		.update({ status })
+		.where({ reservation_id })
+		.returning("*")
+		.then((updatedReservations) => updatedReservations[0]);
+}
+
 module.exports = {
 	list,
 	listByDate,
 	find,
 	create,
+	updateStatus,
 };

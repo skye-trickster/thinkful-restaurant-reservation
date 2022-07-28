@@ -139,6 +139,19 @@ function checkFutureTime(request, response, next) {
 	next();
 }
 
+function checkStatus(request, response, next) {
+	const { status } = response.locals.reservation;
+
+	if (status && status !== "booked") {
+		return next({
+			status: 400,
+			message: "status cannot be seated or finished.",
+		});
+	}
+
+	next();
+}
+
 /**
  * Validate all parameters for creation
  */
@@ -159,6 +172,7 @@ const checkParameters = [
 	checkFutureTime,
 	parameterExists("people"),
 	checkPersonMinimum,
+	checkStatus,
 ];
 
 async function create(request, response) {
@@ -199,6 +213,52 @@ function read(request, response) {
 	response.json({ data: response.locals.reservation });
 }
 
+/// PUT /reservations/:reservation_id/status
+
+function statusExists(request, response, next) {
+	const { data } = request.body;
+	if (!data || !data.status) {
+		return next({
+			status: 400,
+			message: `Missing status`,
+		});
+	}
+	response.locals.status = data.status;
+
+	next();
+}
+
+function validStatus(request, response, next) {
+	const { reservation, status } = response.locals;
+
+	if (status !== "finished" && status !== "booked" && status !== "seated") {
+		return next({
+			status: 400,
+			message: `Invalid status ${status}`,
+		});
+	}
+
+	if (reservation.status === "finished") {
+		return next({
+			status: 400,
+			message: `A finished reservation cannot be updated.`,
+		});
+	}
+
+	next();
+}
+
+async function updateStatus(request, response) {
+	const {
+		reservation: { reservation_id },
+		status,
+	} = response.locals;
+
+	const updatedReservation = await service.updateStatus(reservation_id, status);
+
+	response.json({ data: updatedReservation });
+}
+
 module.exports = {
 	list,
 	create: [
@@ -208,4 +268,10 @@ module.exports = {
 		asyncErrorBoundary(create),
 	],
 	read: [asyncErrorBoundary(reservationExists), asyncErrorBoundary(read)],
+	updateStatus: [
+		asyncErrorBoundary(reservationExists),
+		statusExists,
+		validStatus,
+		asyncErrorBoundary(updateStatus),
+	],
 };
