@@ -78,8 +78,6 @@ function Dashboard({ date }) {
 		}
 	}
 
-	function finishReservation(reservation) {}
-
 	return (
 		<main>
 			<h1 className="text-center">Dashboard</h1>
@@ -119,7 +117,7 @@ function Dashboard({ date }) {
 								<td>{reservation.reservation_time}</td>
 								<td>{reservation.people}</td>
 								<td data-reservation-id-status={reservation.reservation_id}>
-									undefined
+									{reservation.status}
 								</td>
 								<td>
 									<a
@@ -128,15 +126,6 @@ function Dashboard({ date }) {
 										role="button"
 									>
 										Seat
-									</a>
-								</td>
-								<td>
-									<a
-										onClick={() => finishReservation(reservation)}
-										role="button"
-										className="btn btn-danger"
-									>
-										Finish
 									</a>
 								</td>
 							</tr>
@@ -163,12 +152,15 @@ function Dashboard({ date }) {
 									<td>{table.table_id}</td>
 									<td>{table.table_name}</td>
 									<td>{table.capacity}</td>
-									<td>{table.reservation_id === null ? "Free" : "Occupied"}</td>
+									<td data-table-id-status={table.table_id}>
+										{table.reservation_id === null ? "Free" : "Occupied"}
+									</td>
 									{table.reservation_id === null ? undefined : (
 										<td>
 											<button
 												onClick={() => finishTable(table)}
 												className="btn btn-primary"
+												data-table-id-finish={table.table_id}
 											>
 												Finish
 											</button>
