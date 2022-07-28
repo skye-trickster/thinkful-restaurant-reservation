@@ -19,6 +19,13 @@ async function listByDate(reservation_date) {
 		.orderBy("reservation_time");
 }
 
+async function listByNumber(mobile_number) {
+	return knex("reservations")
+		.select("*")
+		.where("mobile_number", "like", `%${mobile_number}%`)
+		.orderBy("reservation_id");
+}
+
 /**
  * Find reservations by ID
  */
@@ -36,6 +43,14 @@ async function create(reservation) {
 		.then((createdReservation) => createdReservation[0]);
 }
 
+function updateReservation(reservation_id, reservation) {
+	return knex("reservations")
+		.update(reservation)
+		.where({ reservation_id })
+		.returning("*")
+		.then((updatedReservations) => updatedReservations[0]);
+}
+
 function updateStatus(reservation_id, status) {
 	return knex("reservations")
 		.update({ status })
@@ -47,7 +62,9 @@ function updateStatus(reservation_id, status) {
 module.exports = {
 	list,
 	listByDate,
+	listByNumber,
 	find,
 	create,
 	updateStatus,
+	updateReservation,
 };

@@ -94,7 +94,7 @@ function checkFutureDay(request, response, next) {
 	if (new Date(reservation_date) < new Date(new Date().toLocaleDateString()))
 		return next({
 			status: 400,
-			message: "Requested date must be set in the future.",
+			message: "reservation_date must be set in the future.",
 		});
 	next();
 }
@@ -109,7 +109,7 @@ function checkValidTime(request, response, next) {
 
 	next({
 		status: 400,
-		message: "Requested Time is not a valid time.",
+		message: "reservation_time is not a valid time.",
 	});
 }
 
@@ -175,6 +175,21 @@ const checkParameters = [
 	checkStatus,
 ];
 
+const checkValidParameters = [
+	parameterExists("first_name"),
+	isEmptyString("first_name"),
+	parameterExists("last_name"),
+	isEmptyString("last_name"),
+	parameterExists("mobile_number"),
+	isEmptyString("mobile_number"),
+	parameterExists("reservation_date"),
+	checkValidDate,
+	parameterExists("reservation_time"),
+	checkValidTime,
+	parameterExists("people"),
+	checkPersonMinimum,
+];
+
 async function create(request, response) {
 	const reservation = await service.create(response.locals.reservation);
 	response.status(201).json({ data: reservation });
@@ -184,8 +199,11 @@ async function create(request, response) {
  * List handler for reservation resources
  */
 async function list(req, res) {
-	let { date } = req.query;
+	let { date, mobile_number } = req.query;
 
+	if (mobile_number) {
+		return res.json({ data: await service.listByNumber(mobile_number) });
+	}
 	if (date) {
 		return res.json({ data: await service.listByDate(date) });
 	}
@@ -231,7 +249,12 @@ function statusExists(request, response, next) {
 function validStatus(request, response, next) {
 	const { reservation, status } = response.locals;
 
-	if (status !== "finished" && status !== "booked" && status !== "seated") {
+	if (
+		status !== "finished" &&
+		status !== "booked" &&
+		status !== "cancelled" &&
+		status !== "seated"
+	) {
 		return next({
 			status: 400,
 			message: `Invalid status ${status}`,
@@ -259,6 +282,32 @@ async function updateStatus(request, response) {
 	response.json({ data: updatedReservation });
 }
 
+// PUT /reservations/:reservation_id
+
+async function updateReservationExist(request, response, next) {
+	const reservation = await service.find(request.params.reservationId);
+
+	if (reservation) {
+		response.locals.reservation_id = request.params.reservationId;
+		return next();
+	}
+
+	next({
+		status: 404,
+		message: `Reservation ID ${request.params.reservationId} cannot be found.`,
+	});
+}
+
+async function updateReservation(request, response) {
+	const { reservation, reservation_id } = response.locals;
+
+	const updatedReservation = await service.updateReservation(
+		reservation_id,
+		reservation
+	);
+	response.json({ data: updatedReservation });
+}
+
 module.exports = {
 	list,
 	create: [
@@ -273,5 +322,11 @@ module.exports = {
 		statusExists,
 		validStatus,
 		asyncErrorBoundary(updateStatus),
+	],
+	updateReservation: [
+		asyncErrorBoundary(updateReservationExist),
+		createReservation,
+		checkValidParameters,
+		asyncErrorBoundary(updateReservation),
 	],
 };
