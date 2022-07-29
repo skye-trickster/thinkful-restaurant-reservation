@@ -91,7 +91,10 @@ function Dashboard({ date }) {
 				</button>
 			</div>
 			<ErrorAlert error={reservationsError} />
-			<ReservationList reservations={reservations} />
+			<ReservationList
+				reservations={reservations}
+				refreshFunction={loadDashboard}
+			/>
 			<div className="mt-2">
 				<h2 className="text-center">Tables</h2>
 				<ErrorAlert error={tablesError} />

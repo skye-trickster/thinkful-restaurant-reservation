@@ -4,7 +4,10 @@ const knex = require("../db/connection");
  * List all reservations unrestricted
  */
 async function list() {
-	return knex("reservations").select("*").whereNot({ status: "finished" });
+	return knex("reservations")
+		.select("*")
+		.whereNot({ status: "finished" })
+		.andWhereNot({ status: "cancelled" });
 }
 
 /**
@@ -16,6 +19,7 @@ async function listByDate(reservation_date) {
 		.select("*")
 		.where({ reservation_date })
 		.andWhereNot({ status: "finished" })
+		.andWhereNot({ status: "cancelled" })
 		.orderBy("reservation_time");
 }
 

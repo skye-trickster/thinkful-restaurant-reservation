@@ -1,8 +1,26 @@
 import React from "react";
 import formatReservationTime from "../utils/format-reservation-time";
 import formatReservationDate from "../utils/format-reservation-date";
+import { reservation_status } from "../utils/api";
 
-function ReservationList({ reservations }) {
+function ReservationList({ reservations, refreshFunction }) {
+	function cancelReservation(event, { reservation_id }) {
+		event.preventDefault();
+		if (
+			window.confirm(
+				"Do you want to cancel this reservation? This cannot be undone."
+			)
+		) {
+			const abortController = new AbortController();
+			reservation_status(
+				reservation_id,
+				"cancelled",
+				abortController.signal
+			).then(refreshFunction);
+			return () => abortController.abort();
+		}
+	}
+
 	return (
 		<table className="w-100">
 			<thead>
@@ -42,6 +60,25 @@ function ReservationList({ reservations }) {
 									</a>
 								</td>
 							)}
+							<td>
+								<a
+									href={`/reservations/${reservation.reservation_id}/edit`}
+									className="btn btn-primary"
+									role="button"
+								>
+									Edit
+								</a>
+							</td>
+							<td>
+								<button
+									onClick={(event) => cancelReservation(event, reservation)}
+									role="button"
+									className="btn btn-danger"
+									data-reservation-id-cancel={reservation.reservation_id}
+								>
+									Cancel
+								</button>
+							</td>
 						</tr>
 					);
 				})}
