@@ -136,6 +136,7 @@ export async function reservation_status(reservation_id, status, signal) {
 		method: "PUT",
 		headers,
 		body: JSON.stringify({ data: { status: status } }),
+		signal,
 	};
 
 	return await fetchJson(url, options, {});
