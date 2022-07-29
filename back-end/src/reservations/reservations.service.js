@@ -4,7 +4,7 @@ const knex = require("../db/connection");
  * List all reservations unrestricted
  */
 async function list() {
-	return knex("reservations").select("*");
+	return knex("reservations").select("*").whereNot({ status: "finished" });
 }
 
 /**
@@ -22,8 +22,11 @@ async function listByDate(reservation_date) {
 async function listByNumber(mobile_number) {
 	return knex("reservations")
 		.select("*")
-		.where("mobile_number", "like", `%${mobile_number}%`)
-		.orderBy("reservation_id");
+		.whereRaw(
+			"translate(mobile_number, '() -', '') like ?",
+			`%${mobile_number.replace(/\D/g, "")}%`
+		)
+		.orderBy("reservation_date");
 }
 
 /**

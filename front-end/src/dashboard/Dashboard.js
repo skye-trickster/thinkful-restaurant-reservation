@@ -73,7 +73,7 @@ function Dashboard({ date }) {
 		) {
 			const abortController = new AbortController();
 			return finishSeating(table.table_id, abortController.signal)
-				.then(() => loadTables(abortController))
+				.then(() => loadDashboard())
 				.catch(setTablesError);
 		}
 	}
@@ -119,15 +119,17 @@ function Dashboard({ date }) {
 								<td data-reservation-id-status={reservation.reservation_id}>
 									{reservation.status}
 								</td>
-								<td>
-									<a
-										href={`/reservations/${reservation.reservation_id}/seat`}
-										className="btn btn-primary"
-										role="button"
-									>
-										Seat
-									</a>
-								</td>
+								{reservation.status === "booked" && (
+									<td>
+										<a
+											href={`/reservations/${reservation.reservation_id}/seat`}
+											className="btn btn-primary"
+											role="button"
+										>
+											Seat
+										</a>
+									</td>
+								)}
 							</tr>
 						);
 					})}
