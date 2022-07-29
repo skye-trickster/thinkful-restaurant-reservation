@@ -72,7 +72,6 @@ function ReservationList({ reservations, refreshFunction }) {
 							<td>
 								<button
 									onClick={(event) => cancelReservation(event, reservation)}
-									role="button"
 									className="btn btn-danger"
 									data-reservation-id-cancel={reservation.reservation_id}
 								>
