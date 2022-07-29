@@ -3,7 +3,7 @@ import useQuery from "../utils/useQuery";
 import { previous, next } from "../utils/date-time";
 import formatReservationTime from "../utils/format-reservation-time";
 import formatReservationDate from "../utils/format-reservation-date";
-import { listReservations, listTables } from "../utils/api";
+import { finishSeating, listReservations, listTables } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 
 import { useHistory } from "react-router-dom";
@@ -46,6 +46,11 @@ function Dashboard({ date }) {
 			.then(setReservations)
 			.catch(setReservationsError);
 
+		return loadTables(abortController);
+	}
+
+	function loadTables(abortController = null) {
+		if (!abortController) abortController = new AbortController();
 		setTablesError(null);
 		listTables(abortController.signal).then(setTables).catch(setTablesError);
 
@@ -58,6 +63,19 @@ function Dashboard({ date }) {
 
 	function previousDate() {
 		history.push(`/dashboard?date=${previous(currentDate)}`);
+	}
+
+	function finishTable(table) {
+		if (
+			window.confirm(
+				"Is this table ready to seat new guests? This cannot be undone."
+			)
+		) {
+			const abortController = new AbortController();
+			return finishSeating(table.table_id, abortController.signal)
+				.then(() => loadDashboard())
+				.catch(setTablesError);
+		}
 	}
 
 	return (
@@ -83,6 +101,7 @@ function Dashboard({ date }) {
 						<th>Date</th>
 						<th>Time</th>
 						<th>People</th>
+						<th>Status</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -97,15 +116,20 @@ function Dashboard({ date }) {
 								<td>{reservation.reservation_date}</td>
 								<td>{reservation.reservation_time}</td>
 								<td>{reservation.people}</td>
-								<td>
-									<a
-										href={`/reservations/${reservation.reservation_id}/seat`}
-										className="btn btn-primary"
-										role="button"
-									>
-										Seat
-									</a>
+								<td data-reservation-id-status={reservation.reservation_id}>
+									{reservation.status}
 								</td>
+								{reservation.status === "booked" && (
+									<td>
+										<a
+											href={`/reservations/${reservation.reservation_id}/seat`}
+											className="btn btn-primary"
+											role="button"
+										>
+											Seat
+										</a>
+									</td>
+								)}
 							</tr>
 						);
 					})}
@@ -113,24 +137,37 @@ function Dashboard({ date }) {
 			</table>
 			<div className="mt-2">
 				<h2 className="text-center">Tables</h2>
+				<ErrorAlert error={tablesError} />
 				<table className="w-100">
 					<thead>
 						<tr>
 							<th>ID</th>
 							<th>Name</th>
 							<th>Capacity</th>
-							<th>Reservation</th>
+							<th>Status</th>
 						</tr>
 					</thead>
 					<tbody>
-						<ErrorAlert error={tablesError} />
 						{tables.map((table) => {
 							return (
 								<tr key={table.table_id}>
 									<td>{table.table_id}</td>
 									<td>{table.table_name}</td>
 									<td>{table.capacity}</td>
-									<td>{table.reservation_id === null ? "Free" : "Occupied"}</td>
+									<td data-table-id-status={table.table_id}>
+										{table.reservation_id === null ? "Free" : "Occupied"}
+									</td>
+									{table.reservation_id === null ? undefined : (
+										<td>
+											<button
+												onClick={() => finishTable(table)}
+												className="btn btn-primary"
+												data-table-id-finish={table.table_id}
+											>
+												Finish
+											</button>
+										</td>
+									)}
 								</tr>
 							);
 						})}

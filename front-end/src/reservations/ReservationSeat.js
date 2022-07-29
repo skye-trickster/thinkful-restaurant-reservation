@@ -41,6 +41,7 @@ function ReservationSeat() {
 	const submitHandler = (event) => {
 		event.preventDefault();
 		const checkCapacity = (table) => {
+			console.log(table);
 			if (table.capacity < reservation.people)
 				throw new Error(
 					`Table ${table.table_name} does not have enough capcity to fit ${reservation.people} people.`
@@ -85,8 +86,8 @@ function ReservationSeat() {
 				>
 					{tables.map((table) => {
 						return (
-							<option key={table.table_id} value={table.table_name}>
-								{table.table_name} - {table.capacity}
+							<option key={table.table_id} value={table.table_id}>
+								{`${table.table_name} - ${table.capacity}`}
 							</option>
 						);
 					})}
