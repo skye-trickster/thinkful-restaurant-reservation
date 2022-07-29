@@ -11,6 +11,7 @@ function ReservationForm({
 		reservation_time: "",
 		people: "",
 	},
+	setErrorFunction = () => {},
 }) {
 	const [reservation, setReservation] = useState(data);
 
@@ -24,13 +25,51 @@ function ReservationForm({
 	function submitHandler(event) {
 		event.preventDefault();
 		reservation.people = parseInt(reservation.people);
-		submitFunction(reservation);
+
+		try {
+			checkFutureDay(reservation);
+			checkOpenDay(reservation);
+			checkOpenTime(reservation);
+			checkFutureTime(reservation);
+			submitFunction(reservation);
+		} catch (error) {
+			setErrorFunction(error);
+		}
 	}
 
 	function cancelHandler(event) {
 		event.preventDefault();
 		cancelFunction();
 	}
+
+	const checkFutureDay = ({ reservation_date }) => {
+		if (new Date(reservation_date) < new Date(new Date().toLocaleDateString()))
+			throw new Error("Requested Date must be set in the future!");
+	};
+
+	const checkOpenDay = ({ reservation_date }) => {
+		const date = new Date(reservation_date);
+
+		if (date.getUTCDay() === 2)
+			throw new Error("Restaurant is closed on Tuesdays!");
+	};
+
+	const checkOpenTime = ({ reservation_time, reservation_date }) => {
+		const requestedTime = new Date(`${reservation_date} ${reservation_time}`);
+		const firstReservation = new Date(`${reservation_date} 10:30`);
+		const lastReservation = new Date(`${reservation_date} 21:30`);
+
+		if (requestedTime > firstReservation && requestedTime < lastReservation)
+			return;
+
+		throw new Error("Restaurant is closed during requested time.");
+	};
+
+	const checkFutureTime = ({ reservation_time, reservation_date }) => {
+		const requestedTime = new Date(`${reservation_date} ${reservation_time}`);
+		if (requestedTime < Date.now())
+			throw new Error("Requested date must be set in the future.");
+	};
 
 	return (
 		<form onSubmit={submitHandler}>
